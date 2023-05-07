@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body>
+<div id="app">
+    <input @keyup.enter="addTask" v-model="inputValue" type="text">
+    <ul>
+        <li v-for="task in tasks">
+            <input type="checkbox" v-model="task.completed">
+            <span>{{task.title}}</span>
+        </li>
+
+    </ul>
+    <h3>Completed Tasks</h3>
+    <ul>
+        <li v-for="task in completedTasks">
+            <input type="checkbox" v-model="task.completed">
+            <span>{{task.title}}</span>
+        </li>
+
+    </ul>
+</div>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<script>
+    const {createApp, ref, computed, watch} = Vue;
+    createApp({
+        setup() {
+            const inputValue = ref();
+            const tasks = ref([]);
+            const addTask = () => {
+                console.log(inputValue)
+
+                tasks.value.push({
+                    title: inputValue.value,
+                    completed: false,
+                });
+                inputValue.value = "";
+                console.log(completedTaskCount);
+            }
+            const completedTasks = computed(() => {
+                return tasks.value.filter(t => t.completed);
+            });
+            const completedTaskCount = computed(() => {
+                return completedTasks.value.length;
+            })
+
+            watch(inputValue, (newValue, oldValue) => {
+                console.log(`inputValue changed from ${oldValue} to ${newValue}`)
+            })
+
+            return {inputValue, tasks, addTask, completedTaskCount, completedTasks};
+        }
+    }).mount('#app')
+</script>
+</body>
+</html>
