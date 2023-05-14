@@ -1,18 +1,33 @@
 <template>
     <div class="flex justify-center w-full">
         <div class="flex flex-col w-3/4">
-            <div class="">
+            <div class="flex justify-between items-center">
                 <div class="flex">
                     <h1 class="text-5xl font-bold">Notes</h1>
                 </div>
+                <svg @click="isEditingModalOpen = true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 cursor-pointer">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                </svg>
+
             </div>
-            <note-editor @add="addNote"></note-editor>
             <div class="grid grid-cols-3 gap-4 items-start mt-4">
-                <note @removed="removeNote" v-for="(note,index) in notes" :index="index" :note="note"></note>
+                <note @removed="removeNote" @edit="enterEditMode" v-for="(note,index) in notes" :index="index"
+                      :note="note"></note>
             </div>
-            <note-editor @add="addNote"></note-editor>
+
         </div>
     </div>
+    <Modal v-if="isEditingModalOpen" @close="handleModalClose" :is-open="isEditingModalOpen">
+        <template #actions>
+            <span></span>
+        </template>
+
+        <h3 class="font-bold text-2xl">Note Editor</h3>
+        <note-editor @add="addNote" @edit="editNote" :note="editingNote"></note-editor>
+
+    </Modal>
+
 </template>
 <script setup>
 import {computed, ref} from "vue";
@@ -21,6 +36,10 @@ import {computed, ref} from "vue";
 import {colorForNoteByIndex} from "@/helpers";
 import Note from "@/components/Note.vue";
 import NoteEditor from "@/components/NoteEditor.vue";
+import Modal from "@/components/Modal.vue";
+import NoteEditorModal from "@/components/NoteEditorModal.vue";
+
+const isEditingModalOpen = ref(false);
 
 const notes = ref([
     {
@@ -34,6 +53,7 @@ const notes = ref([
 
 ]);
 
+const editingNote = ref();
 const removeNote = (note) => {
     const index = notes.value.indexOf(note);
     const confirmed = confirm(`Are you sure you want to delete the note ${note.title}`);
@@ -45,6 +65,23 @@ const removeNote = (note) => {
 const addNote = (note) => {
     notes.value.push(note);
 }
+const editNote = (note) => {
+    const index = notes.value.indexOf(editingNote.value);
+    notes.value[index] = note;
+    editingNote.value = null;
+}
 
+const isEditing = computed(() => {
+    return editingNote.value != null;
+})
+const enterEditMode = (note) => {
+    isEditingModalOpen.value = true;
+    editingNote.value = note;
+}
+
+const handleModalClose = () => {
+    isEditingModalOpen.value = false
+    editingNote.value = null;
+}
 
 </script>
