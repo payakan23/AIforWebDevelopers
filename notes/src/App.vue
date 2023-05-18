@@ -12,9 +12,13 @@
 
             </div>
             <div class="grid grid-cols-3 gap-4 items-start mt-4">
-                <note @removed="removeNote" @edit="enterEditMode" v-for="(note,index) in notes" :index="index"
+                <TransitionGroup name="fade">
+                    <note @removed="removeNote" @edit="enterEditMode" v-for="(note,index) in notes" :index="index" :key="`note-${index}`" 
                       :note="note"></note>
+                </TransitionGroup>
+               
             </div>
+            
 
         </div>
     </div>
@@ -27,6 +31,10 @@
         <note-editor @add="addNote" @edit="editNote" :note="editingNote"></note-editor>
 
     </Modal>
+   
+
+  
+
 
 </template>
 <script setup>
@@ -38,9 +46,10 @@ import Note from "@/components/Note.vue";
 import NoteEditor from "@/components/NoteEditor.vue";
 import Modal from "@/components/Modal.vue";
 import NoteEditorModal from "@/components/NoteEditorModal.vue";
-
+const isTextShown = ref(false);
 const isEditingModalOpen = ref(false);
-
+const isDeletingModalOpen = ref(false);
+const boxesCount = ref(5);
 const notes = ref([
     {
         title: "Note Title",
@@ -56,19 +65,21 @@ const notes = ref([
 const editingNote = ref();
 const removeNote = (note) => {
     const index = notes.value.indexOf(note);
-    const confirmed = confirm(`Are you sure you want to delete the note ${note.title}`);
-    if (!confirmed) {
-        return;
-    }
+    // const confirmed = confirm(`Are you sure you want to delete the note ${note.title}`);
+    // if (!confirmed) {
+        // return;
+    // }
     notes.value.splice(index, 1);
 }
 const addNote = (note) => {
     notes.value.push(note);
+    isEditingModalOpen.value = false;
 }
 const editNote = (note) => {
     const index = notes.value.indexOf(editingNote.value);
     notes.value[index] = note;
     editingNote.value = null;
+    isEditingModalOpen.value = false;
 }
 
 const isEditing = computed(() => {
