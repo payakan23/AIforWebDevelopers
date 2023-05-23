@@ -1,7 +1,8 @@
 <template>
-    <router-link :to="{name: 'Details', params: {id: movie.id}}">
 
-        <div class="flex flex-col bg-white rounded-lg text-black">
+    <div class="flex flex-col bg-white rounded-lg text-black">
+        <router-link :to="{name: 'Details', params: {id: movie.id}}">
+
             <div class="w-full overflow-hidden rounded-t-lg">
                 <img class="w-full transition hover:scale-150" :src="imageURL" alt="">
             </div>
@@ -11,15 +12,16 @@
                 <span>
                     {{ overview }}
                 </span>
-                    <a @click="isOverviewExpanded = true"
+                    <a @click.stop="isOverviewExpanded = true"
                        class="text-sm text-indigo-500 font-bold" v-if="overview.length != movie.overview.length"
                        href="#">
                         Read more...
                     </a>
                 </div>
             </div>
-        </div>
-    </router-link>
+        </router-link>
+
+    </div>
 </template>
 <script setup>
 import {computed, ref} from "vue";

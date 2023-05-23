@@ -4,6 +4,17 @@
             <input @input="searchMoviesDebounced" @blur="handleBlur" v-model="searchQueryValue"
                    placeholder="Search for a movie..."
                    class="w-full p-2 rounded-lg text-black" type="text">
+            <div class="flex gap-4 mt-4">
+                <button @click="timeWindow = 'week'" class="bg-indigo-500 rounded-lg px-2 py-1"
+                        :class="{'bg-rose-700':timeWindow === 'week'}"
+                >Week
+                </button>
+                <button @click="timeWindow = 'day'" class="bg-indigo-500 rounded-lg px-2 py-1"
+                        :class="{'bg-rose-700':timeWindow == 'day'}"
+
+                >Day
+                </button>
+            </div>
             <Transition name="slide-fade">
                 <div v-if="isSearching"
                      class="absolute bottom-[-%100] mt-2 w-full p-2 rounded-lg z-10 bg-gray-500 overflow-y-scroll scrollbar-hide scr max-h-[80vh] ">
@@ -34,15 +45,19 @@
 
             </Transition>
         </div>
-        <div class="w-3/4 grid grid-cols-4 gap-4">
-            <Movie v-for="movie in movies" :movie="movie"/>
+        <div class="w-3/4 grid grid-cols-4 gap-4 items-stretch">
+
+            <Movie v-if="!isLoadingMovies" v-for="movie in movies" :movie="movie"/>
+            <div v-else class="col-span-4 flex justify-center">
+                <span>Loading Movies...</span>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
 import axios from "@/http";
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import Movie from "@/components/Movie.vue";
 import {fullImageUrl} from "@/helpers";
 import {debounce} from "lodash";
@@ -51,9 +66,15 @@ const searchQueryValue = ref('');
 const isSearching = computed(() => {
     return searchQueryValue.value != '';
 });
-const movies = ref([]);
+const movies = ref(null);
+const isLoadingMovies = computed(() => {
+    return movies.value == null;
+});
 const searchResults = ref();
-
+const timeWindow = ref('week');
+watch(timeWindow, () => {
+    fetchTrendingMovies();
+});
 const searchMovies = async () => {
     const {data} = await axios.get('/search/movie', {
         params: {
@@ -68,12 +89,13 @@ const handleBlur = () => {
     searchResults.value = null
     searchQueryValue.value = '';
 }
-const fetchMovies = async () => {
-    const {data} = await axios.get('/trending/movie/day', {});
+const fetchTrendingMovies = async () => {
+    movies.value = null;
+    const {data} = await axios.get(`/trending/movie/${timeWindow.value}`, {});
     movies.value = data.results;
 }
 
 onMounted(() => {
-    fetchMovies();
+        fetchTrendingMovies();
 })
 </script>
