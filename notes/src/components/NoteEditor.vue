@@ -41,7 +41,7 @@ const noteTitleValue = ref('');
 
 onMounted(() => {
     if(props.note != null) {
-        noteTextValue.value = props.note.text;
+        noteTextValue.value = props.note.body;
         noteTitleValue.value = props.note.title;
     }
 })
@@ -75,12 +75,12 @@ const addOrSaveNote = () => {
 
     if (isEditing.value) {
         emit('edit', {
-            text: trimmedNoteTextValue.value,
+            body: trimmedNoteTextValue.value,
             title: noteTitleValue.value,
         })
     } else {
         emit('add', {
-            text: trimmedNoteTextValue.value,
+            body: trimmedNoteTextValue.value,
             title: noteTitleValue.value
         })
     }

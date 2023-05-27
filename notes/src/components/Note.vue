@@ -22,7 +22,7 @@
 
 
         </div>
-        <pre v-text="note.text"></pre>
+        <pre v-text="note.body"></pre>
         
         <Modal :is-open="isDeletingModalOpen" @close="isDeletingModalOpen = false"
         @cancel="isDeletingModalOpen = false"
