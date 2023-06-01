@@ -1,8 +1,10 @@
 import {Request, Response, NextFunction} from "express";
 import User from "../entities/user";
-export interface RequestWithUser extends Request{
+
+export interface RequestWithUser extends Request {
     user: User
 }
+
 export default async (req: RequestWithUser, res: Response, next: NextFunction) => {
     let authHeader = req.header('Authorization');
     console.log(authHeader);
@@ -20,8 +22,15 @@ export default async (req: RequestWithUser, res: Response, next: NextFunction) =
     }
 
 
-    let user = await User.findOneBy({authToken});
-    if(user == null) {
+    let user = await User.findOne({
+        where: {authToken}, select: {
+            id: true,
+            username: true,
+            authToken: true,
+        }
+    });
+
+    if (user == null) {
         return res.status(401).json({
             message: "Unauthenticated",
         })

@@ -27,7 +27,13 @@ exports.default = (req, res, next) => __awaiter(void 0, void 0, void 0, function
             message: "Unauthenticated",
         });
     }
-    let user = yield user_1.default.findOneBy({ authToken });
+    let user = yield user_1.default.findOne({
+        where: { authToken }, select: {
+            id: true,
+            username: true,
+            authToken: true,
+        }
+    });
     if (user == null) {
         return res.status(401).json({
             message: "Unauthenticated",

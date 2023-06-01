@@ -39,7 +39,7 @@ export default class AuthController {
         try {
             await user.save();
         } catch (error: any) {
-            return res.json({
+            return res.status(422).json({
                 message: error?.message ?? "Something went wrong."
             })
         }
@@ -54,6 +54,7 @@ export default class AuthController {
     async login(@Req() req: Request, @Res() res: Response) {
         // install bcrypt
         // install jwt jsonwebtoken
+        console.log("Got request")
         const {username, password} = req.body;
         if (username == null || password == null) {
             return res.status(422).json({
@@ -61,7 +62,11 @@ export default class AuthController {
             });
         }
 
-        const user = await User.findOneBy({username});
+        const user = await User.findOne({
+            where: {username}, select: {
+                username: true, password: true,id: true
+            }
+        });
         if (user == null) {
             return res.status(401).json({
                 message: "The username or password is incorrect"

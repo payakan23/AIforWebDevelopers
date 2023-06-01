@@ -27,19 +27,63 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("@decorators/express");
 const authMiddleware_1 = __importDefault(require("../middlewares/authMiddleware"));
 const conversation_1 = __importDefault(require("../entities/conversation"));
+const message_1 = __importDefault(require("../entities/message"));
+const typeorm_1 = require("typeorm");
+const user_1 = __importDefault(require("../entities/user"));
 // @ts-ignore
 let ConversationController = class ConversationController {
+    getMessages(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let conversationId = Number(req.params.conversationId);
+            let conversation = yield conversation_1.default.findOneBy({ id: conversationId });
+            if (conversation == null) {
+                return res.status(404);
+            }
+            let messages = yield message_1.default.find({
+                where: {
+                    conversation: (0, typeorm_1.Equal)(conversationId)
+                },
+            });
+            res.json({ messages });
+        });
+    }
+    createMessage(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let conversationId = Number(req.params.conversationId);
+            let conversation = yield conversation_1.default.findOneBy({ id: conversationId });
+            if (conversation == null) {
+                return res.status(404);
+            }
+            if (req.body.text == "") {
+                return res.status(422).send();
+            }
+            let message = new message_1.default();
+            message.conversation = conversation;
+            message.user = req.user;
+            message.text = req.body.text;
+            try {
+                yield message.save();
+            }
+            catch (e) {
+                console.log(e);
+            }
+            res.json({ message });
+        });
+    }
     createNewConversation(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             let conversation = new conversation_1.default();
             conversation.title = req.body.title;
             let user = req.user;
-            conversation.users = [user];
+            let users = yield user_1.default.findBy({ id: (0, typeorm_1.In)(req.body.users) });
+            console.log(users);
+            conversation.users = users;
             try {
-                conversation.save();
+                yield conversation.save();
                 return res.json(conversation);
             }
             catch (e) {
+                console.log(e);
                 return res.status(422).send();
             }
         });
@@ -48,7 +92,8 @@ let ConversationController = class ConversationController {
         return __awaiter(this, void 0, void 0, function* () {
             const conversations = yield conversation_1.default.find({
                 relations: {
-                    messages: true
+                    messages: true,
+                    users: true
                 }
             });
             return res.json({
@@ -56,7 +101,31 @@ let ConversationController = class ConversationController {
             });
         });
     }
+    getAllUsers(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const users = yield user_1.default.find();
+            return res.json({
+                users
+            });
+        });
+    }
 };
+__decorate([
+    (0, express_1.Get)('/:conversationId/messages'),
+    __param(0, (0, express_1.Req)()),
+    __param(1, (0, express_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], ConversationController.prototype, "getMessages", null);
+__decorate([
+    (0, express_1.Post)('/:conversationId/messages'),
+    __param(0, (0, express_1.Req)()),
+    __param(1, (0, express_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], ConversationController.prototype, "createMessage", null);
 __decorate([
     (0, express_1.Post)('/'),
     __param(0, (0, express_1.Req)()),
@@ -73,6 +142,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], ConversationController.prototype, "getAllConversations", null);
+__decorate([
+    (0, express_1.Get)('/users'),
+    __param(0, (0, express_1.Req)()),
+    __param(1, (0, express_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], ConversationController.prototype, "getAllUsers", null);
 ConversationController = __decorate([
     (0, express_1.Controller)('/conversations', [authMiddleware_1.default])
 ], ConversationController);

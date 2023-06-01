@@ -34,7 +34,7 @@ __decorate([
     __metadata("design:type", conversation_1.default)
 ], Message.prototype, "conversation", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_1.default, (user) => user.messages),
+    (0, typeorm_1.ManyToOne)(() => user_1.default, (user) => user.messages, { eager: true }),
     __metadata("design:type", user_1.default)
 ], Message.prototype, "user", void 0);
 Message = __decorate([

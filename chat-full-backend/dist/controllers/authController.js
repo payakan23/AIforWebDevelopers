@@ -61,7 +61,7 @@ let AuthController = class AuthController {
                 yield user.save();
             }
             catch (error) {
-                return res.json({
+                return res.status(422).json({
                     message: (_a = error === null || error === void 0 ? void 0 : error.message) !== null && _a !== void 0 ? _a : "Something went wrong."
                 });
             }
@@ -75,13 +75,18 @@ let AuthController = class AuthController {
         return __awaiter(this, void 0, void 0, function* () {
             // install bcrypt
             // install jwt jsonwebtoken
+            console.log("Got request");
             const { username, password } = req.body;
             if (username == null || password == null) {
                 return res.status(422).json({
                     message: "The username and password are required"
                 });
             }
-            const user = yield user_1.default.findOneBy({ username });
+            const user = yield user_1.default.findOne({
+                where: { username }, select: {
+                    username: true, password: true, id: true
+                }
+            });
             if (user == null) {
                 return res.status(401).json({
                     message: "The username or password is incorrect"
